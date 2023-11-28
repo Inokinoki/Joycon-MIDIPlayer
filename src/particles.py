@@ -140,8 +140,5 @@ def get_note_texture(texture_str):
 
 
 def init(args):
-    global particles
-
-    if not args.no_particles:
-        particles = []
-        get_note_texture(args.particles_texture)
+    # Disable particles
+    pass
