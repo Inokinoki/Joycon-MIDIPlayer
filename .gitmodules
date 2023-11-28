@@ -1,0 +1,3 @@
+[submodule "libjoycon"]
+	path = libjoycon
+	url = https://github.com/Inokinoki/libjoycon.git
