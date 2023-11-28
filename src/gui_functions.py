@@ -143,7 +143,7 @@ def draw_note(image, p, note):
     if note.joycon is not None:
         center = ((pts[1][0][0] + pts[2][0][0]) // 2, pts[1][0][1])
         radius = 6
-        cv2.circle(image, center, radius, RED, cv2.FILLED)
+        cv2.circle(image, center, radius, note.joycon.get_color(), cv2.FILLED)
 
 
 def find_note_polygon(image, color, x):
