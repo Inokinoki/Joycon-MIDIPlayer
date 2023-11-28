@@ -7,9 +7,11 @@ import sys
 import part
 import os
 import serial_handler
+import joycon
+import color
 
 
-def playing_loop(mid, p, port, gui, notes, t):
+def playing_loop(mid, p, port, gui, notes, t, joycons):
     length = p[-2]["time"]
     i = 0
     modif = 0
@@ -27,11 +29,17 @@ def playing_loop(mid, p, port, gui, notes, t):
         if tnow + modif > p[i]["time"] + tstart:
             logger.my_logger.debug(p[i])
             if p[i]["msg"].type == "note_on" and not p[i]["note_off"]:
-                notes[p[i]["msg"].note - 21].playuntil = (
+                note_index = p[i]["msg"].note - 21
+                notes[note_index].playuntil = (
                     tnow + p[i]["new_velocity"] / 10
                 )
-                notes[p[i]["msg"].note - 21].velocity = p[i]["new_velocity"]
-                notes[p[i]["msg"].note - 21].channel = p[i]["msg"].channel
+                notes[note_index].velocity = p[i]["new_velocity"]
+                notes[note_index].channel = p[i]["msg"].channel
+                for joycon in joycons:
+                    if not joycon.is_busy():
+                        notes[note_index].joycon = joycon
+                        joycon.note_on(0)   # TODO: note
+                        break
             if port:
                 port.send(p[i]["msg"])
             i += 1
@@ -92,6 +100,9 @@ def main():
                 serial_handler.SerialHandler, notes, args.serial, args.baudrate
             )
         )
+    joycons = []
+    for i, c in zip(range(3), [color.RED, color.GREEN, color.YELLOW]):
+        joycons.append(joycon.Joycon(i, joycon_color=c))
     for midifile in args.midifiles:
         try:
             mid = mido.MidiFile(midifile)
@@ -104,7 +115,7 @@ def main():
         t = None
         if gui:
             t = create_thread(gui.gui_handler.Gui, notes, gui, args.fps, name, length)
-        playing_loop(mid, partition, port, gui, notes, t)
+        playing_loop(mid, partition, port, gui, notes, t, joycons)
         if gui:
             t.terminate()
     for thread in threads:

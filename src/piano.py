@@ -32,6 +32,10 @@ class Piano(Thread):
                     note.is_on = True
                 else:
                     note.is_on = False
+                    if note.joycon is not None:
+                        joycon = note.joycon
+                        note.joycon = None
+                        joycon.note_off(0)  # TODO: note
             time.sleep(0.008)
             delta = time.time() - tnow
 
