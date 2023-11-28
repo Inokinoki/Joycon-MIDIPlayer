@@ -1,4 +1,5 @@
 import color
+import libjoycon
 
 class Joycon:
     FREQ_OFFSET = 36
@@ -20,31 +21,32 @@ class Joycon:
         self._buf = None
         self._color = joycon_color
 
-        # buf = libjoycon.joycon_allocate_buffer(buffer_len)
+        buf = libjoycon.joycon_allocate_buffer(buffer_len)
 
         # Init handler
         try:
             print(f"Opening the device {device_id}")
 
-            # h = hid.device()
-            # h.open(0x57e, device_id, None)
+            h = hid.device()
+            # TODO: More device
+            h.open(0x57e, device_id, None)
 
             print("Open device")
 
             # TODO: Try to get color from joycon
 
-            # libjoycon.joycon_packet_rumble_enable_only(buf, self._timer & 0xF)
-            # h.write(buf2list(buf, buffer_len))
+            libjoycon.joycon_packet_rumble_enable_only(buf, self._timer & 0xF)
+            h.write(buf2list(buf, buffer_len))
 
             # enable non-blocking mode
-            # h.set_nonblocking(1)
+            h.set_nonblocking(1)
 
-            # self._handler = h
-            # self._buf = buf
+            self._handler = h
+            self._buf = buf
         except IOError as ex:
             print(ex)
             self._handler = None
-            # libjoycon.joycon_free_buffer(buf)
+            libjoycon.joycon_free_buffer(buf)
 
     def is_busy(self):
         return self._is_busy
@@ -80,3 +82,19 @@ class Joycon:
 
     def get_color(self):
         return self._color
+
+    def __del__(self):
+        if self._handler is not None:
+            try:
+                self._timer += 1
+                buf = self._buf
+                libjoycon.joycon_packet_rumble_disable(buf, self._timer & 0xF, 0, 0)
+                self._handler.write(buf2list(buf, buffer_len))
+
+                print("Closing the device")
+                self._handler.close()
+                self._handler = None
+            except IOError as ex:
+                pass
+            finally:
+                libjoycon.joycon_free_buffer(self._buf)
