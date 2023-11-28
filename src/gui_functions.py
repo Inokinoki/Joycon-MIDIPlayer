@@ -141,7 +141,7 @@ def draw_note(image, p, note):
     cv2.fillPoly(image, [pts], color)
     cv2.polylines(image, [pts], True, BLACK)
     if note.joycon is not None:
-        center = ((pts[1][0][0] + pts[2][0][0]) // 2, pts[1][0][1])
+        center = ((pts[-3][0][0] + pts[-2][0][0]) // 2, pts[-3][0][1])
         radius = 6
         cv2.circle(image, center, radius, note.joycon.get_color(), cv2.FILLED)
 
