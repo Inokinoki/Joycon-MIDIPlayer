@@ -33,9 +33,10 @@ class Piano(Thread):
                 else:
                     note.is_on = False
                     if note.joycon is not None:
+                        note_index_orig = note.id + 21
                         joycon = note.joycon
                         note.joycon = None
-                        joycon.note_off(0)  # TODO: note
+                        joycon.note_off(note_index_orig)
             time.sleep(0.008)
             delta = time.time() - tnow
 

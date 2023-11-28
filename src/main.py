@@ -30,16 +30,18 @@ def playing_loop(mid, p, port, gui, notes, t, joycons):
             logger.my_logger.debug(p[i])
             if p[i]["msg"].type == "note_on" and not p[i]["note_off"]:
                 note_index = p[i]["msg"].note - 21
+                note_index_orig = p[i]["msg"].note
                 notes[note_index].playuntil = (
                     tnow + p[i]["new_velocity"] / 10
                 )
                 notes[note_index].velocity = p[i]["new_velocity"]
                 notes[note_index].channel = p[i]["msg"].channel
-                for joycon in joycons:
-                    if not joycon.is_busy():
-                        notes[note_index].joycon = joycon
-                        joycon.note_on(0)   # TODO: note
-                        break
+                for j in joycons:
+                    if not j.is_busy():
+                        if note_index_orig >= joycon.Joycon.FREQ_OFFSET and note_index_orig < joycon.Joycon.FREQ_OFFSET_MAX:
+                            notes[note_index].joycon = j
+                            j.note_on(note_index_orig)
+                            break
             if port:
                 port.send(p[i]["msg"])
             i += 1
