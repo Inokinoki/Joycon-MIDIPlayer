@@ -140,6 +140,10 @@ def draw_note(image, p, note):
         color = COLOR_CHANNEL_DARK[note.channel]
     cv2.fillPoly(image, [pts], color)
     cv2.polylines(image, [pts], True, BLACK)
+    if note.joycon is not None:
+        center = ((pts[1][0][0] + pts[2][0][0]) // 2, pts[1][0][1])
+        radius = 6
+        cv2.circle(image, center, radius, RED, cv2.FILLED)
 
 
 def find_note_polygon(image, color, x):

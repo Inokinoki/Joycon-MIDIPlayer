@@ -14,6 +14,7 @@ class Note:
         self.particles = None
         self.is_on = False
         self.is_white = PATTERN[id % 12]
+        self.joycon = None
 
 
 class Piano(Thread):
