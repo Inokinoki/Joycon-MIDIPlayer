@@ -1,5 +1,16 @@
 import color
 import libjoycon
+import hidraw as hid
+
+buffer_len = 64
+
+
+def buf2list(buf, size):
+    l = [0] * size
+    for i in range(size):
+        l[i] = libjoycon.byteArray_getitem(buf, i)
+    return l
+
 
 class Joycon:
     FREQ_OFFSET = 36
@@ -59,9 +70,9 @@ class Joycon:
         if self._buf:
             try:
                 self._timer += 1
-                if note - JoyconNoteOutput.FREQ_OFFSET < len(JoyconNoteOutput.freqs):
+                if note - Joycon.FREQ_OFFSET < len(Joycon.freqs):
                     libjoycon.joycon_packet_rumble_only(self._buf, self._timer & 0xF,\
-                        JoyconNoteOutput.freqs[note - JoyconNoteOutput.FREQ_OFFSET], 0)
+                        Joycon.freqs[note - Joycon.FREQ_OFFSET], 0)
                     self._handler.write(buf2list(self._buf, buffer_len))
             except IOError as ex:
                 print(ex)
@@ -69,11 +80,11 @@ class Joycon:
         print(f"\tNote off {note}")
 
     def note_on(self, note, amp=0.5):
-        if self._buf and (note - JoyconNoteOutput.FREQ_OFFSET) < len(JoyconNoteOutput.freqs):
+        if self._buf and (note - Joycon.FREQ_OFFSET) < len(Joycon.freqs):
             try:
                 self._timer += 1
                 libjoycon.joycon_packet_rumble_only(self._buf, self._timer & 0xF,\
-                    JoyconNoteOutput.freqs[note - JoyconNoteOutput.FREQ_OFFSET], amp)
+                    Joycon.freqs[note - Joycon.FREQ_OFFSET], amp)
                 self._handler.write(buf2list(self._buf, buffer_len))
             except IOError as ex:
                 print(ex)
